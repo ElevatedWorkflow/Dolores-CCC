@@ -1,78 +1,106 @@
-const Discord = require("discord.js");
-const { Client, Intents } = require("discord.js");
-const SlashCommandsClient = require("discord-slash-commands-client");
+const { Client, GatewayIntentBits } = require('discord.js');
 
-// Replace 'your-bot-token' with your bot's token
-const botToken = "your-bot-token";
-const client = new Client({ intents: [Intents.FLAGS.Guilds, Intents.FLAGS.GuildMessages] });
-
-// Create a new SlashCommandsClient instance
-const slashCommands = new SlashCommandsClient(botToken);
-
-client.on("ready", async () => {
-  console.log(`Logged in as ${client.user.tag}!`);
-
-  // Register the slash command for creating channels
-  await slashCommands.createCommand(
-    {
-      name: "channel",
-      description: "Create a new channel",
-      options: [
-        {
-          name: "create",
-          description: "Create a new channel",
-          type: 1,
-          options: [],
-        },
-      ],
-    },
-    "your-guild-id" // Replace with your server's Guild ID
-  );
+const botToken = 'BOT_TOKEN_HERE';
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers,
+  ],
 });
 
-client.on("interactionCreate", async (interaction) => {
+client.on('ready', async () => {
+  console.log(`Logged in as ${client.user.tag}!`);
+
+  const guild = client.guilds.cache.get('GUILD_ID');
+  if (!guild) return console.error('Guild not found');
+
+  // Register the slash command for managing channels
+  await guild.commands.create({
+    name: 'channel',
+    description: 'Manage custom channels',
+    options: [
+      {
+        name: 'create',
+        description: 'Create a new channel',
+        type: 'SUB_COMMAND',
+        options: [
+          {
+            name: 'name',
+            description: 'Name of the new channel',
+            type: 'STRING',
+            required: true,
+          },
+        ],
+      },
+      {
+        name: 'limit',
+        description: 'Set the user limit for a channel',
+        type: 'SUB_COMMAND',
+        options: [
+          {
+            name: 'int',
+            description: 'User limit',
+            type: 'INTEGER',
+            required: true,
+          },
+        ],
+      },
+      {
+        name: 'allow',
+        description: 'Allow a user to access the channel',
+        type: 'SUB_COMMAND',
+        options: [
+          {
+            name: 'user',
+            description: 'User to allow',
+            type: 'USER',
+            required: true,
+          },
+        ],
+      },
+      {
+        name: 'kick',
+        description: 'Kick a user from the channel',
+        type: 'SUB_COMMAND',
+        options: [
+          {
+            name: 'user',
+            description: 'User to kick',
+            type: 'USER',
+            required: true,
+          },
+        ],
+      },
+    ],
+  });
+});
+
+client.on('interactionCreate', async (interaction) => {
   if (!interaction.isCommand()) return;
 
   const { commandName, options } = interaction;
 
-  if (commandName === "channel" && options.getSubcommand() === "create") {
-    const channel = await interaction.guild.channels.create("channelname", {
-      permissionOverwrites: [
-        {
-          id: interaction.guild.roles.everyone,
-          deny: ["VIEW_CHANNEL"],
-        },
-        {
-          id: interaction.member,
-          allow: [
-            "VIEW_CHANNEL",
-            "SEND_MESSAGES",
-            "EMBED_LINKS",
-            "ATTACH_FILES",
-            "READ_MESSAGE_HISTORY",
-          ],
-        },
-        {
-          id: interaction.guild.me,
-          allow: [
-            "VIEW_CHANNEL",
-            "SEND_MESSAGES",
-            "EMBED_LINKS",
-            "ATTACH_FILES",
-            "READ_MESSAGE_HISTORY",
-          ],
-        },
-      ],
-    });
+  if (commandName === 'channel') {
+    const subcommand = options.getSubcommand();
 
-    channel.edit({ name: `${channel.id}-store` });
-
-    // Send a direct message to the member
-    const user = interaction.user;
-    await user.send(`Your channel has been created: ${channel}`);
-
-    // Reply to the slash command
-    await interaction.reply("Channel created successfully.");
+    switch (subcommand) {
+      case 'create':
+        // Handle channel creation
+        break;
+      case 'limit':
+        // Handle setting channel user limit
+        break;
+      case 'allow':
+        // Handle allowing user access to the channel
+        break;
+      case 'kick':
+        // Handle kicking user from the channel
+        break;
+      default:
+        await interaction.reply('Unknown subcommand.');
+    }
   }
 });
 
