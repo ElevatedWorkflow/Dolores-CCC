@@ -6,11 +6,12 @@
             {
                 "name": "create",
                 "description": "Create a new channel",
-                "type": 2,
+                "type": 1,
                 "options": [
                     {
                         "name": "name",
                         "description": "The name of the channel",
+                        "type": 3,
                         "required": true
                     }
                 ]
@@ -18,11 +19,12 @@
             {
                 "name": "limit",
                 "description": "limit the number of users in a channel",
-                "type": 2,
+                "type": 1,
                 "options": [
                     {
                         "name": "number",
                         "description": "The number of users allowed in the channel",
+                        "type": 4,
                         "required": true
                     }
                 ]
@@ -30,10 +32,12 @@
             {
                 "name": "allow",
                 "description": "Allow a user to join a channel",
+                "type": 1,
                 "options": [
                     {
                         "name": "user",
                         "description": "The user to allow",
+                        "type": 6,
                         "required": true
                     }
                 ]
@@ -41,10 +45,12 @@
             {
                 "name": "kick",
                 "description": "Kick a user from a channel",
+                "type": 1,
                 "options": [
                     {
                         "name": "user",
                         "description": "The user to kick",
+                        "type": 6,
                         "required": true
                     }
                 ]

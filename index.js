@@ -1,6 +1,6 @@
 require('dotenv').config();
 const { Client, GatewayIntentBits } = require('discord.js');
-const commandData = require('./commands.json');
+const fs = require('fs'); // Add this line to import the fs module
 const create = require('./commands/create');
 const limit = require('./commands/limit');
 const allow = require('./commands/allow');
@@ -22,10 +22,13 @@ client.on('ready', async () => {
   const guild = client.guilds.cache.get(process.env.GUILD_ID);
   if (!guild) return console.error('Guild not found');
 
+  // Read and parse the commands.json file
+  const commandData = JSON.parse(fs.readFileSync('./commands.json', 'utf-8'));
 
-  // Register the slash command for managing channels
-  await guild.commands.create({
-  });
+  // Iterate through the commands and create each one
+  for (const command of commandData) {
+    await guild.commands.create(command);
+  }
 });
 
 client.on('interactionCreate', async (interaction) => {
@@ -38,7 +41,8 @@ client.on('interactionCreate', async (interaction) => {
 
     switch (subcommand) {
       case 'create':
-        await create(interaction);
+        const name = options.getString('name');
+        await create(interaction, name);
         break;
       case 'limit':
         await limit(interaction);

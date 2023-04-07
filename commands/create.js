@@ -1,32 +1,39 @@
-async function create(interaction) {
-  const channelName = interaction.options.getString('name');
-  const channelType = interaction.options.getString('type');
+const { Permissions } = require('discord.js');
 
-  const channel = await interaction.guild.channels.create(channelName, {
-    type: channelType, // 'text' or 'voice'
-    permissionOverwrites: [    // Permissions for the channel
+const create = async (interaction, name) => {
+  const guild = interaction.guild;
+  const member = interaction.member;
+
+  console.log(`Creating channel with name: "${name}"`);
+
+  try {
+    const channel = await guild.channels.create(name, {
+      type: 'GUILD_VOICE',
+      permissionOverwrites: [
         {
-            id: interaction.guild.roles.everyone,
-            deny: ['VIEW_CHANNEL', 'CONNECT'],
+          id: guild.roles.everyone.id,
+          deny: ['VIEW_CHANNEL', 'CONNECT']
         },
         {
-            id: interaction.user.id,
-            allow: ['VIEW_CHANNEL', 'CONNECT'],
+          id: member.id,
+          allow: ['VIEW_CHANNEL', 'CONNECT']
         },
-    ],
-  });
+      ],
+    });
 
-  await instructions();
+    console.log('Channel created:', channel);
 
-    async function instructions() {
-        await interaction.reply(`Created ${channel}`);
-        const instructions = `To manage this channel use the following commands:\n
-            - /channel limit {int}: to set the maximum number of users in the channel\n
-            - /channel allow {user}: to allow a user to join the channel\n
-            - /channel kick {user}: to kick a user from the channel`;
+    await interaction.reply(`Channel "${name}" has been created.`);
+    const instructions = `To manage your channel, use the following commands:\n
+    - /channel limit {int}: Set the user limit for the channel.\n
+    - /channel allow {user}: Allow a user to join the channel.\n
+    - /channel kick {user}: Kick a user from the channel.`;
 
-        await interaction.user.send(instructions);
-    }
-}
+    await member.send(instructions);
+  } catch (error) {
+    console.error('Error creating channel:', error);
+    await interaction.reply('An error occurred while creating the channel.');
+  }
+};
 
 module.exports = create;
