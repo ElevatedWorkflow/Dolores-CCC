@@ -1,5 +1,6 @@
 require('dotenv').config();
 const { Client, GatewayIntentBits } = require('discord.js');
+const commandData = require('./commands.json');
 const create = require('./commands/create');
 const limit = require('./commands/limit');
 const allow = require('./commands/allow');

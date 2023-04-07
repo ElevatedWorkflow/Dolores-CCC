@@ -11,7 +11,7 @@
                     {
                         "name": "name",
                         "description": "The name of the channel",
-                        "required": true,
+                        "required": true
                     }
                 ]
             },
@@ -23,7 +23,29 @@
                     {
                         "name": "number",
                         "description": "The number of users allowed in the channel",
-                        "required": true,
+                        "required": true
+                    }
+                ]
+            },
+            {
+                "name": "allow",
+                "description": "Allow a user to join a channel",
+                "options": [
+                    {
+                        "name": "user",
+                        "description": "The user to allow",
+                        "required": true
+                    }
+                ]
+            },
+            {
+                "name": "kick",
+                "description": "Kick a user from a channel",
+                "options": [
+                    {
+                        "name": "user",
+                        "description": "The user to kick",
+                        "required": true
                     }
                 ]
             }
