@@ -1,0 +1,32 @@
+[
+    {
+        "name": "channel",
+        "description": "Create a new channel",
+        "options": [
+            {
+                "name": "create",
+                "description": "Create a new channel",
+                "type": 2,
+                "options": [
+                    {
+                        "name": "name",
+                        "description": "The name of the channel",
+                        "required": true,
+                    }
+                ]
+            },
+            {
+                "name": "limit",
+                "description": "limit the number of users in a channel",
+                "type": 2,
+                "options": [
+                    {
+                        "name": "number",
+                        "description": "The number of users allowed in the channel",
+                        "required": true,
+                    }
+                ]
+            }
+        ]
+    }
+]
