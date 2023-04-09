@@ -1,10 +1,13 @@
+const channelCache = new Map();
+
 require('dotenv').config();
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, ChannelType } = require('discord.js');
 const fs = require('fs'); // Add this line to import the fs module
 const create = require('./commands/create');
 const limit = require('./commands/limit');
 const allow = require('./commands/allow');
 const kick = require('./commands/kick');
+const { type } = require('os');
 
 const botToken = process.env.BOT_TOKEN;
 const client = new Client({
@@ -42,7 +45,7 @@ client.on('interactionCreate', async (interaction) => {
     switch (subcommand) {
       case 'create':
         const name = options.getString('name');
-        await create(interaction, name);
+        await create(interaction, name, ChannelType);
         break;
       case 'limit':
         await limit(interaction);

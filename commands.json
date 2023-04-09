@@ -1,7 +1,7 @@
 [
     {
         "name": "channel",
-        "description": "Create a new channel",
+        "description": "manage voice channels",
         "options": [
             {
                 "name": "create",

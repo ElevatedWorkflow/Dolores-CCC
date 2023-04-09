@@ -1,6 +1,6 @@
-const { Permissions } = require('discord.js');
+const { PermissionFlagsBits } = require('discord.js');
 
-const create = async (interaction, name) => {
+const create = async (interaction, name, channelCache) => {
   const guild = interaction.guild;
   const member = interaction.member;
 
@@ -11,14 +11,20 @@ const create = async (interaction, name) => {
       type: 'GUILD_VOICE',
       permissionOverwrites: [
         {
-          id: guild.roles.everyone.id,
-          deny: ['VIEW_CHANNEL', 'CONNECT']
+          id: guild.roles.everyone,
+          deny: [PermissionFlagsBits.Connect, PermissionFlagsBits.ViewChannel],
         },
         {
           id: member.id,
-          allow: ['VIEW_CHANNEL', 'CONNECT']
+          allow: [PermissionFlagsBits.Connect, PermissionFlagsBits.ViewChannel],
         },
       ],
+    });
+
+    // Store the created channel in the cache
+    channelCache.set(channel.id, {
+      creator: member.id,
+      channel: channel,
     });
 
     console.log('Channel created:', channel);
