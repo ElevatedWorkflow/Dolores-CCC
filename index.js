@@ -7,6 +7,7 @@ const create = require('./commands/create');
 const limit = require('./commands/limit');
 const allow = require('./commands/allow');
 const kick = require('./commands/kick');
+const verify = require('./commands/verify');
 const { type } = require('os');
 
 const botToken = process.env.BOT_TOKEN;
@@ -16,6 +17,7 @@ const client = new Client({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildVoiceStates,
   ],
 });
 
@@ -44,8 +46,14 @@ client.on('interactionCreate', async (interaction) => {
 
     switch (subcommand) {
       case 'create':
-        const name = options.getString('name');
-        await create(interaction, name, ChannelType);
+        if (options.data[0]?.options) {
+          const nameOption = options.data[0].options[0];
+          const name = nameOption.value;
+          console.log(`Channel name: ${name}`);
+          await create(interaction, name, process.env.BOT_TOKEN); // Pass the botToken directly
+        } else {
+          await interaction.reply('Channel name is required.');
+        }
         break;
       case 'limit':
         await limit(interaction);
@@ -59,7 +67,14 @@ client.on('interactionCreate', async (interaction) => {
       default:
         await interaction.reply('Unknown subcommand.');
     }
+  } else if (commandName === 'verify') {
+    await verify(interaction, {
+      unverifiedRoleID: process.env.UNVERIFIED_ROLE_ID,
+      verifiedRoleID: process.env.VERIFIED_ROLE_ID
+    });
+    return;
   }
 });
 
 client.login(botToken);
+module.exports = { botToken };

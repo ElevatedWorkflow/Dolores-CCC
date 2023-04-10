@@ -1,45 +1,39 @@
-const { PermissionFlagsBits } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 
-const create = async (interaction, name, channelCache) => {
-  const guild = interaction.guild;
-  const member = interaction.member;
-
-  console.log(`Creating channel with name: "${name}"`);
-
+async function create(interaction, name, botToken) {
   try {
-    const channel = await guild.channels.create(name, {
-      type: 'GUILD_VOICE',
-      permissionOverwrites: [
-        {
-          id: guild.roles.everyone,
-          deny: [PermissionFlagsBits.Connect, PermissionFlagsBits.ViewChannel],
-        },
-        {
-          id: member.id,
-          allow: [PermissionFlagsBits.Connect, PermissionFlagsBits.ViewChannel],
-        },
-      ],
+    console.log(`Creating channel with name: ${name}`);
+
+    const fetch = (await import('node-fetch')).default;
+
+    const response = await fetch(`https://discord.com/api/v10/guilds/${interaction.guild.id}/channels`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bot ${botToken}`,
+      },
+      body: JSON.stringify({
+        name: name,
+        type: 2, // Change this line to create a voice channel instead of a text channel
+      }),
     });
 
-    // Store the created channel in the cache
-    channelCache.set(channel.id, {
-      creator: member.id,
-      channel: channel,
-    });
+    if (!response.ok) {
+      throw new Error(`Error creating channel: ${response.statusText}`);
+    }
 
-    console.log('Channel created:', channel);
+    const channel = await response.json();
+    console.log(`Channel created: ${channel.name}`);
 
-    await interaction.reply(`Channel "${name}" has been created.`);
-    const instructions = `To manage your channel, use the following commands:\n
-    - /channel limit {int}: Set the user limit for the channel.\n
-    - /channel allow {user}: Allow a user to join the channel.\n
-    - /channel kick {user}: Kick a user from the channel.`;
-
-    await member.send(instructions);
+    const embed = new MessageEmbed()
+      .setTitle('Channel Created')
+      .setDescription(`Created voice channel: ${channel.name}`)
+      .setColor('#00FF00');
+    await interaction.reply({ embeds: [embed] });
   } catch (error) {
-    console.error('Error creating channel:', error);
-    await interaction.reply('An error occurred while creating the channel.');
+    console.error(`Error creating channel: ${error}`);
+    await interaction.reply('Error creating channel.');
   }
-};
+}
 
 module.exports = create;
