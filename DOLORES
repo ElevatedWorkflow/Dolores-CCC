@@ -1,0 +1,240 @@
+//You are the best Discord bot developer, utilizing Discord API & discord.js JSON API. You are attempting to help me make a bot that utilizes ChatGPT & OpenAI to identify what a user is trying to do or wants to know in the server. If they want to just chat so be it, but the bot, currently called "Dolores VI" should be able to identify a command with a users basic English and then run that command, for example;
+
+'User: "i need my own room"
+Assistant: Right away!, then runs "/channel create {name}.'
+
+'User: "i need my own room with a limit of 5 users!"
+Assistant: Right away!, then runs "/channel create {name} {limit}, or "/channel limit {number} after the first one".'
+
+//Here is a few of the existing files and a short description of their usecase
+
+./index.js: //here contains the core code, that references other modules once called upon by the user.
+
+```const channelCache = new Map();
+
+require('dotenv').config();
+const { Client, GatewayIntentBits, ChannelType } = require('discord.js');
+const fs = require('fs');
+const openai = require('openai');
+const create = require('./commands/create');
+const limit = require('./commands/limit');
+const allow = require('./commands/allow');
+const kick = require('./commands/kick');
+const verify = require('./commands/verify');
+const { type } = require('os');
+const { getChatGPTResponse } = require('./chatgpt');
+openai.apiKey = process.env.OPENAI_API_KEY;
+
+const botToken = process.env.BOT_TOKEN;
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent, 
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildVoiceStates,
+    GatewayIntentBits.GuildMessageReactions,
+    GatewayIntentBits.GuildMessageTyping,
+    GatewayIntentBits.GuildPresences,
+    GatewayIntentBits.Guilds,
+  ],
+});
+
+client.on('ready', async () => {
+  console.log(`Logged in as ${client.user.tag}!`);
+
+  const guild = client.guilds.cache.get(process.env.GUILD_ID);
+  if (!guild) return console.error('Guild not found');
+
+  // Read and parse the commands.json file
+  const commandData = JSON.parse(fs.readFileSync('./commands.json', 'utf-8'));
+
+  // Iterate through the commands and create each one
+  for (const command of commandData) {
+    await guild.commands.create(command);
+  }
+});
+
+client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isCommand()) return;
+
+  const { commandName, options } = interaction;
+
+  if (commandName === 'channel') {
+    const subcommand = options.getSubcommand();
+
+    switch (subcommand) {
+      case 'create':
+        if (options.data[0]?.options) {
+          const nameOption = options.data[0].options[0];
+          const name = nameOption.value;
+          console.log(`Channel name: ${name}`);
+          await create(interaction, name, process.env.BOT_TOKEN); // Pass the botToken directly
+        } else {
+          await interaction.reply('Channel name is required.');
+        }
+        break;
+      case 'limit':
+        await limit(interaction);
+        break;
+      case 'allow':
+        await allow(interaction);
+        break;
+      case 'kick':
+        await kick(interaction);
+        break;
+      default:
+        await interaction.reply('Unknown subcommand.');
+    }
+  } else if (commandName === 'verify') {
+    await verify(interaction, {
+      unverifiedRoleID: process.env.UNVERIFIED_ROLE_ID,
+      verifiedRoleID: process.env.VERIFIED_ROLE_ID
+    });
+    return;
+  }
+});
+
+client.on('messageCreate', async (message) => {
+  // Ignore messages from bots
+  if (message.author.bot) return;
+
+  // Check if the bot is mentioned
+  if (message.mentions.has(client.user)) {
+    const response = await getChatGPTResponse(message.content);
+
+    // Reply with the ChatGPT response if it's not empty
+    if (response.trim() !== "") {
+      message.reply(response);
+    }
+  }
+});
+
+client.login(botToken);
+module.exports = { botToken };
+module.exports = { openai };
+```
+
+./chatgpt.js //chatgpt API and access
+
+```
+const axios = require("axios");
+
+async function getChatGPTResponse(prompt) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${apiKey}`,
+  };
+
+  const data = {
+    model: "gpt-4",
+    messages: [
+      {
+        role: "system",
+        content: "You are ChatGPT, a helpful AI language model.",
+      },
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
+    max_tokens: 150,
+    temperature: 0.7,
+  };
+
+  try {
+    const response = await axios.post(
+        "https://api.openai.com/v1/chat/completions",
+        data,
+        { headers: headers }
+    );
+
+    return response.data.choices[0].message.content.trim();
+  } catch (error) {
+    console.error("Error getting ChatGPT response:", error.response.data);
+    return "I'm sorry, but I couldn't process your message.";
+    }
+}
+
+module.exports = { getChatGPTResponse };
+```
+
+./commands.json; //slash command layout within discord GUI
+
+```
+[
+    {
+      "name": "verify",
+      "description": "Verify a user by removing the 'Unverified' role and adding the 'Verified' role.",
+      "options": [
+        {
+          "name": "user",
+          "description": "The user you want to verify.",
+          "type": 6,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "channel",
+      "description": "Manage voice channels",
+      "options": [
+        {
+          "name": "create",
+          "description": "Create a voice channel",
+          "type": 1,
+          "options": [
+            {
+              "name": "name",
+              "description": "The name of the voice channel",
+              "type": 3,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "limit",
+          "description": "Set the user limit for your voice channel",
+          "type": 1,
+          "options": [
+            {
+              "name": "limit",
+              "description": "The user limit for the voice channel (0-99)",
+              "type": 4,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "allow",
+          "description": "Allow a user to connect to your voice channel",
+          "type": 1,
+          "options": [
+            {
+              "name": "user",
+              "description": "The user you want to allow",
+              "type": 6,
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "kick",
+          "description": "Kick a user from your voice channel",
+          "type": 1,
+          "options": [
+            {
+              "name": "user",
+              "description": "The user you want to kick",
+              "type": 6,
+              "required": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+```
+
+./commands/{command}.js; //each command and it's *.js file.

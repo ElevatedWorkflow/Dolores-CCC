@@ -2,22 +2,29 @@ const channelCache = new Map();
 
 require('dotenv').config();
 const { Client, GatewayIntentBits, ChannelType } = require('discord.js');
-const fs = require('fs'); // Add this line to import the fs module
+const fs = require('fs');
+const openai = require('openai');
 const create = require('./commands/create');
 const limit = require('./commands/limit');
 const allow = require('./commands/allow');
 const kick = require('./commands/kick');
 const verify = require('./commands/verify');
 const { type } = require('os');
+const { getChatGPTResponse } = require('./chatgpt');
+openai.apiKey = process.env.OPENAI_API_KEY;
 
 const botToken = process.env.BOT_TOKEN;
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.MessageContent, 
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildVoiceStates,
+    GatewayIntentBits.GuildMessageReactions,
+    GatewayIntentBits.GuildMessageTyping,
+    GatewayIntentBits.GuildPresences,
+    GatewayIntentBits.Guilds,
   ],
 });
 
@@ -76,5 +83,21 @@ client.on('interactionCreate', async (interaction) => {
   }
 });
 
+client.on('messageCreate', async (message) => {
+  // Ignore messages from bots
+  if (message.author.bot) return;
+
+  // Check if the bot is mentioned
+  if (message.mentions.has(client.user)) {
+    const response = await getChatGPTResponse(message.content);
+
+    // Reply with the ChatGPT response if it's not empty
+    if (response.trim() !== "") {
+      message.reply(response);
+    }
+  }
+});
+
 client.login(botToken);
 module.exports = { botToken };
+module.exports = { openai };
