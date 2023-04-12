@@ -1,4 +1,4 @@
-const channelCache = new Map();
+const conversationCache = new Map();
 
 require('dotenv').config();
 const { Client, GatewayIntentBits, ChannelType } = require('discord.js');
@@ -89,7 +89,21 @@ client.on('messageCreate', async (message) => {
 
   // Check if the bot is mentioned
   if (message.mentions.has(client.user)) {
-    const response = await getChatGPTResponse(message.content);
+    // Update conversation cache
+    const userId = message.author.id;
+    let conversation = conversationCache.get(userId) || [];
+
+    conversation.push({ role: 'user', content: message.content });
+    if (conversation.length > 9) {
+      conversation.shift();
+    }
+    conversationCache.set(userId, conversation);
+
+    const response = await getChatGPTResponse(conversation);
+
+    // Update conversation cache with the bot's response
+    conversation.push({ role: 'assistant', content: response });
+    conversationCache.set(userId, conversation);
 
     // Reply with the ChatGPT response if it's not empty
     if (response.trim() !== "") {

@@ -1,0 +1,4 @@
+{
+    "CodeGPT.maxTokens": 1024,
+    "CodeGPT.model": "gpt-4"
+}
