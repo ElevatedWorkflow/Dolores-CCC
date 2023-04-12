@@ -1,0 +1,71 @@
+{
+  "Name": "Command",
+  "commands": {
+    "verify": {
+      "name": "verify",
+      "description": "Verify a user by removing the 'Unverified' role and adding the 'Verified' role.",
+      "options": [
+        {
+          "name": "user",
+          "description": "The user you want to verify.",
+          "type": 6,
+          "required": true
+        }
+      ]
+    },
+    "channel": {
+      "name": "channel",
+      "description": "Manage voice channels",
+      "members": {
+        "create": {
+          "name": "create",
+          "description": "Create a voice channel",
+          "options": [
+            {
+              "name": "name",
+              "description": "The name of the voice channel",
+              "type": 3,
+              "required": true
+            }
+          ]
+        },
+        "limit": {
+          "name": "limit",
+          "description": "Set the user limit for your voice channel",
+          "options": [
+            {
+              "name": "limit",
+              "description": "The user limit for the voice channel (0-99)",
+              "type": 4,
+              "required": true
+            }
+          ]
+        },
+        "allow": {
+          "name": "allow",
+          "description": "Allow a user to connect to your voice channel",
+          "options": [
+            {
+              "name": "user",
+              "description": "The user you want to allow",
+              "type": 6,
+              "required": true
+            }
+          ]
+        },
+        "kick": {
+          "name": "kick",
+          "description": "Kick a user from your voice channel",
+          "options": [
+            {
+              "name": "user",
+              "description": "The user you want to kick",
+              "type": 6,
+              "required": true
+            }
+          ]
+        }
+      }
+    }
+  }
+}
