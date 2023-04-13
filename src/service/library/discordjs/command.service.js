@@ -1,31 +1,27 @@
-const BaseService = require('../../base/service.base');
-const GuildService = require('../discordjs/guild.service');
-const VerifyService = require('./verify.service');
-const VCManagerService = require('./vcmanager.service');
-const EmbedService = require('../discordjs/embed.service');
-
-class CommandService extends BaseService {
-  constructor() {
-    super();
-    this.guildService = new GuildService(this.Client);
+class CommandService {
+  constructor(clientService, guildService, messageService, loggerService) {
+    this.clientService = clientService;
+    this.guildService = guildService;
+    this.messageService = messageService;
+    this.loggerService = loggerService;
   }
 
-  async register() {
+  async registerCommands() {
     try {
       const guild = await this.guildService.getGuild();
 
-      this.Logger.Log.System(
-        `${this.Message.Messages.command.register.prefix} ${this.Message.Messages.command.register.start}`
+      this.loggerService.logSystem(
+        `${this.messageService.Messages.command.register.prefix} ${this.messageService.Messages.command.register.start}`
       );
 
-      const commands = this.Config.Command.commands;
+      const commands = this.configService.Command.commands;
       for (const [commandName, commandData] of Object.entries(commands)) {
         await guild.commands.create(commandData);
-        this.Logger.Log.Success(`Registered command: ${commandName}`);
+        this.loggerService.logSuccess(`Registered command: ${commandName}`);
       }
 
-      this.Logger.Log.Success(
-        `${this.Message.Messages.command.register.prefix} ${this.Message.Messages.command.register.success}`
+      this.loggerService.logSuccess(
+        `${this.messageService.Messages.command.register.prefix} ${this.messageService.Messages.command.register.success}`
       );
     } catch (error) {
       console.error(error);
@@ -33,7 +29,7 @@ class CommandService extends BaseService {
   }
 
   setupListeners() {
-    this.Client.on('interactionCreate', async (interaction) => {
+    this.clientService.Client.on('interactionCreate', async (interaction) => {
       if (interaction.isCommand()) {
         this.bind(interaction);
       }
