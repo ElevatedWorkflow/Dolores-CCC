@@ -1,4 +1,3 @@
-const { TextChannel } = require('discord.js');
 const BaseService = require('../../../service/base.service');
 
 class ChannelService extends BaseService  {

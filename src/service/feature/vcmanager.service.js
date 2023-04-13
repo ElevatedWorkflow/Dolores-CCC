@@ -1,5 +1,4 @@
-const { MessageEmbed } = require('discord.js');
-const BaseService = require('../BaseService');
+const BaseService = require('../base/service.base');
 
 class VCManagerService extends BaseService {
 

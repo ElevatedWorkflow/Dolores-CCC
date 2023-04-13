@@ -1,5 +1,5 @@
 module.exports = {
-    ChannelJSON: require('../config/channel.config.jsonn'),
+    ChannelJSON: require('../config/channel.config.json'),
     ClientJSON: require('../config/client.config.json'),
     CommandJSON: require('../config/command.config.json'),
     ReactionRoleJSON: require('../config/reactionrole.config.json'),

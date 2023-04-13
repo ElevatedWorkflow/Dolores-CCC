@@ -1,7 +1,7 @@
-const ConversationCacheModel = require('../model/conversationcache.model');
+const ConversationCacheModel = require('../../../model/conversationcache.model');
 const conversationCache = new ConversationCacheModel();
 
-class ConversationService {
+class ConversationHelperServicer {
   getConversation(userId) {
     return conversationCache.get(userId);
   }
@@ -16,4 +16,4 @@ class ConversationService {
   }
 }
 
-module.exports = ConversationService;
+module.exports = ConversationHelperServicer;

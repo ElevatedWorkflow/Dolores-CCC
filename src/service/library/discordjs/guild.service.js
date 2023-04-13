@@ -6,7 +6,7 @@ class GuildService extends BaseService {
   }
 
   getGuild() {
-    return this.Client.client.guilds.cache.get(this.Config.System.guildID);
+    return this.Client.client.guilds.cache.get(process.env.GUILD_ID);
   }
 }
 

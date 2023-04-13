@@ -1,4 +1,5 @@
 const chalk = require('chalk');
+const MessageService = require('./message.service');
 
 const MessageCode = {
   SYSTEM: 'system',
@@ -8,26 +9,31 @@ const MessageCode = {
 };
 
 class LoggerService {
-  static Log = {
-    System: (message) => {
-      LoggerService.LogMessage(MessageCode.SYSTEM, message, chalk.yellow);
-    },
-    Error: (error) => {
-      if (error instanceof Error) {
-        LoggerService.LogMessage(MessageCode.ERROR, error.message, chalk.red);
-      }
-    },
-    Success: (message) => {
-      LoggerService.LogMessage(MessageCode.SUCCESS, message, chalk.green);
-    },
-    LogMessage: (type, message, consoleColor) => {
-      const prefix = consoleColor(this.Message.Messages.logging.prefix[type]);
-      const logTime = chalk.blueBright(
-        `${new Date().toLocaleDateString('en-US')} ${new Date().toLocaleTimeString('en-US')}`
-      );
-      console.log(`<${prefix}>: ${message} [${logTime}]`);
-    },
-  };
+  constructor(messageService) {
+    this.messageService = new MessageService();
+  }
+
+  logSystem(message) {
+    this.logMessage(MessageCode.SYSTEM, message, chalk.yellow);
+  }
+
+  logError(error) {
+    if (error instanceof Error) {
+      this.logMessage(MessageCode.ERROR, error.message, chalk.red);
+    }
+  }
+
+  logSuccess(message) {
+    this.logMessage(MessageCode.SUCCESS, message, chalk.green);
+  }
+
+  logMessage(type, message, consoleColor) {
+    const prefix = consoleColor(this.messageService.Messages.logging.prefix[type]);
+    const logTime = chalk.blueBright(
+      `${new Date().toLocaleDateString('en-US')} ${new Date().toLocaleTimeString('en-US')}`
+    );
+    console.log(`<${prefix}>: ${message} [${logTime}]`);
+  }
 }
 
 module.exports = LoggerService;

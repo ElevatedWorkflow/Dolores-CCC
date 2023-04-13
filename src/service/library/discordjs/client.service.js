@@ -1,54 +1,25 @@
-const { Client, GatewayIntentBits } = require('discord.js');
-const BaseService = require('../../base/service.base');
+const { Client } = require('discord.js');
 
-class ClientService extends BaseService {
-  constructor(botToken, openai, messageHandler, guildService) {
-    super();
-    this.botToken = botToken;
-    this.openai = openai;
-    this.guildService = guildService;
-    this.messageHandler = messageHandler;
-  }
-
-  async init() {
+class ClientService {
+  client;
+  constructor() {
     this.client = this.createClient();
-
-    this.client.on('ready', async () => {
-      console.log(`Logged in as ${this.client.user.tag}!`);
-
-      await this.guildService.registerCommands();
-
-      this.guildService.registerListeners();
-    });
-
-    this.client.on('messageCreate', async (message) => {
-      if (message.author.bot) return;
-
-      if (message.mentions.has(this.client.user)) {
-        await this.messageHandler.handleMentionedMessage(message);
-      }
-    });
-
-    await this.login();
   }
 
   createClient() {
-    return new Client({
-      intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent,
-        GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.GuildVoiceStates,
-        GatewayIntentBits.GuildMessageReactions,
-        GatewayIntentBits.GuildMessageTyping,
-        GatewayIntentBits.GuildPresences,
-      ],
-    });
+    return new Client({intents: 32767});
   }
 
+  get Client() {
+    return this.client;
+  }
   async login() {
-    await this.client.login(this.botToken);
+    try {
+      await this.client.login("MTA5NTg5MDQxMDk1OTgwMjQ3OQ.GdIC4P.B7h4eWmxUJ4y8pjVwQP4MT2gQIChtvhg5IFCzc");
+      console.log('Bot is now connected!');
+    } catch (error) {
+      console.error('Error connecting to Discord:', error);
+    }
   }
 }
 

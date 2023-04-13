@@ -1,12 +1,15 @@
-const axios = require("axios");
+class ChatGPTService {
+  constructor() {
+    this.conversationCache = new Map();
+    this.apiKey = process.env.OPENAI_API_KEY;
+  }
 
-async function getChatGPTResponse(conversation) {
-    const apiKey = process.env.OPENAI_API_KEY;
+  async getResponse(conversation) {
     const headers = {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${this.apiKey}`,
     };
-  
+
     const data = {
       model: "gpt-4",
       messages: [
@@ -16,28 +19,27 @@ async function getChatGPTResponse(conversation) {
         },
         ...conversation.map((message) => ({
           role: message.role,
-          content: message.content.replace(/<@!?(\d+)>/g, '') // Remove mentions from the message content
+          content: message.content.replace(/<@!?(\d+)>/g, ""), // Remove mentions from the message content
         })),
       ],
       max_tokens: 150,
       temperature: 0.7,
     };
-  
+
     try {
       const response = await axios.post(
-          "https://api.openai.com/v1/chat/completions",
-          data,
-          { headers: headers }
+        "https://api.openai.com/v1/chat/completions",
+        data,
+        { headers: headers }
       );
-  
+
       const gptResponse = response.data.choices[0].message.content.trim();
-      conversationCache.set(conversationId, gptResponse);
       return gptResponse;
-      
     } catch (error) {
       console.error("Error getting ChatGPT response:", error.response.data);
       return "I'm sorry, but I couldn't process your message.";
     }
   }
+}
 
-module.exports = { getChatGPTResponse };
+module.exports = ChatGPTService;

@@ -1,7 +1,9 @@
-const MessageJSON = require('./config/message.config.json');
+const MessageJSON = require('../../config/message.config.json');
 
 class MessageService {
-  static Messages = MessageJSON;
+  constructor() {
+    this.Messages = MessageJSON;
+  }
 }
 
 module.exports = MessageService;
