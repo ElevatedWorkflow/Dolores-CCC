@@ -1,8 +1,6 @@
-const BaseService = require('../../base/service.base');
-
-class GuildService extends BaseService {
+class GuildService {
   constructor() {
-    super();
+    
   }
 
   getGuild() {

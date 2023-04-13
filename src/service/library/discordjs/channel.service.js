@@ -1,6 +1,4 @@
-const BaseService = require('../../../service/base.service');
-
-class ChannelService extends BaseService  {
+class ChannelService  {
   Validate = () => {
     this.Logger.Log.System(this.Message.Messages.system.startup.channel.start);
     this.GetSystemChannels().forEach((option) => {

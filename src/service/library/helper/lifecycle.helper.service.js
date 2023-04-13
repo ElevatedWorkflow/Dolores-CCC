@@ -23,7 +23,7 @@ class LifecycleHelperService {
                 });
 
                 const response = await this.chatGPTService.handleMessage(
-                    
+                    this.conversationService.getConversation(userId)
                 );
 
                 this.conversationService.updateConversation(userId, {

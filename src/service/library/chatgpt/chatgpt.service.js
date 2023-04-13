@@ -1,15 +1,17 @@
+axios = require('axios')
+
 class ChatGPTService {
   constructor() {
     this.conversationCache = new Map();
     this.apiKey = process.env.OPENAI_API_KEY;
   }
 
-  async getResponse(conversation) {
+  async getResponse(conversation, userId) {
     const headers = {
       "Content-Type": "application/json",
       Authorization: `Bearer ${this.apiKey}`,
     };
-
+  
     const data = {
       model: "gpt-4",
       messages: [
@@ -19,26 +21,42 @@ class ChatGPTService {
         },
         ...conversation.map((message) => ({
           role: message.role,
-          content: message.content.replace(/<@!?(\d+)>/g, ""), // Remove mentions from the message content
+          content: message.content.replace(/<@!?(\d+)>/g, '') // Remove mentions from the message content
         })),
       ],
       max_tokens: 150,
       temperature: 0.7,
     };
-
+  
     try {
       const response = await axios.post(
-        "https://api.openai.com/v1/chat/completions",
-        data,
-        { headers: headers }
+          "https://api.openai.com/v1/chat/completions",
+          data,
+          { headers: headers }
       );
-
-      const gptResponse = response.data.choices[0].message.content.trim();
+  
+      console.log(response)
+      const gptResponse = gptResponse.config.data.messages.find(message => message.role === "system").content.trim();
+      conversationCache.set(userId, gptResponse);
       return gptResponse;
+      
     } catch (error) {
-      console.error("Error getting ChatGPT response:", error.response.data);
+      console.error("Error getting ChatGPT response:", error.response);
       return "I'm sorry, but I couldn't process your message.";
     }
+  }
+
+  async handleMessage(conversation) {
+    const userId = conversation[0].content.match(/<@!?(\d+)>/)[1];
+    const cacheKey = `${userId}`;
+    const cachedConversation = this.conversationCache.get(cacheKey) || [];
+    const newConversation = cachedConversation.concat(conversation);
+  
+    this.conversationCache.set(cacheKey, newConversation);
+  
+    const response = await this.getResponse(newConversation, userId);
+  
+    return response;
   }
 }
 

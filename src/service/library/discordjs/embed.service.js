@@ -1,8 +1,7 @@
 const { MessageEmbed } = require('discord.js');
-const BaseService = require('../../base/service.base');
 const EmbedParam = require('../../../model/embedparam.model');
 
-class EmbedService extends BaseService {
+class EmbedService {
   static createReactionRoleEmbed(reactionRoleGroup) {
     const embedFields = reactionRoleGroup.members.map((member) => new EmbedParam(member.roleName, member.emoji));
     return createBasicEmbedFromData(reactionRoleGroup.name, reactionRoleGroup.message, embedFields, reactionRoleGroup.inline);

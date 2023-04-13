@@ -1,9 +1,20 @@
 class CommandService {
-  constructor(clientService, guildService, messageService, loggerService) {
+  constructor(
+    clientService,
+    guildService,
+    messageService,
+    loggerService,
+    validationHelperService,
+    vcManagerService,
+    verifyService
+  ) {
     this.clientService = clientService;
     this.guildService = guildService;
     this.messageService = messageService;
     this.loggerService = loggerService;
+    this.validationHelperService = validationHelperService;
+    this.vcManagerService = vcManagerService;
+    this.verifyService = verifyService;
   }
 
   async registerCommands() {
@@ -14,8 +25,9 @@ class CommandService {
         `${this.messageService.Messages.command.register.prefix} ${this.messageService.Messages.command.register.start}`
       );
 
-      const commands = this.configService.Command.commands;
-      for (const [commandName, commandData] of Object.entries(commands)) {
+      this.validationHelperService.validateConfig(this.configService.Command.commands);
+
+      for (const [commandName, commandData] of Object.entries(this.configService.Command.commands)) {
         await guild.commands.create(commandData);
         this.loggerService.logSuccess(`Registered command: ${commandName}`);
       }
@@ -24,7 +36,7 @@ class CommandService {
         `${this.messageService.Messages.command.register.prefix} ${this.messageService.Messages.command.register.success}`
       );
     } catch (error) {
-      console.error(error);
+      this.loggerService.logError(error.message, error);
     }
   }
 
@@ -42,10 +54,10 @@ class CommandService {
     if (commandName === 'channel') {
       const subcommand = options.getSubcommand();
       const subcommands = {
-        create: VCManagerService.prototype.create,
-        limit: VCManagerService.prototype.limit,
-        allow: VCManagerService.prototype.allow,
-        kick: VCManagerService.prototype.kick,
+        create: this.vcManagerService.create.bind(this.vcManagerService),
+        limit: this.vcManagerService.limit.bind(this.vcManagerService),
+        allow: this.vcManagerService.allow.bind(this.vcManagerService),
+        kick: this.vcManagerService.kick.bind(this.vcManagerService),
       };
 
       if (subcommands[subcommand]) {
@@ -54,7 +66,7 @@ class CommandService {
         await interaction.reply('Unknown subcommand.');
       }
     } else if (commandName === 'verify') {
-      await VerifyService.prototype.verify(interaction, {
+      await this.verifyService.verify(interaction, {
         unverifiedRoleID: process.env.UNVERIFIED_ROLE_ID,
         verifiedRoleID: process.env.VERIFIED_ROLE_ID,
       });
