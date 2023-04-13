@@ -1,9 +1,8 @@
 const ConversationCacheModel = require('../../../model/conversationcache.model');
-const conversationCache = new ConversationCacheModel();
-
 class ConversationHelperServicer {
+  conversationCache = new ConversationCacheModel();
   getConversation(userId) {
-    return conversationCache.get(userId);
+    return this.conversationCache.get(userId);
   }
 
   updateConversation(userId, messageObj) {
@@ -12,7 +11,7 @@ class ConversationHelperServicer {
     if (conversation.length > 9) {
       conversation.shift();
     }
-    conversationCache.set(userId, conversation);
+    this.conversationCache.set(userId, conversation);
   }
 }
 

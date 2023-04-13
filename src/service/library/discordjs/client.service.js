@@ -15,7 +15,7 @@ class ClientService {
   }
   async login() {
     try {
-      await this.client.login("MTA5NTg5MDQxMDk1OTgwMjQ3OQ.G5aFBW.k6stsizSsfLXsQLqAqdWjDtfIxiWJsnIc005-8");
+      await this.client.login("");
       console.log('Bot is now connected!');
     } catch (error) {
       console.error('Error connecting to Discord:', error);
