@@ -2,6 +2,7 @@ const axios = require("axios")
 const fs = require('fs');
 
 const contentFromFile = fs.readFileSync('./combined_output.txt', 'utf8');
+//const responsesFromFile = fs.readFileSync("./responses.txt", "utf8"); [CODE HAULT]
 class ChatGPTService {
   constructor(conversationService) {
     this.conversationService = conversationService;
@@ -14,10 +15,13 @@ class ChatGPTService {
       Authorization: `Bearer ${this.apiKey}`,
     };
 
+    //const systemMessageContent = contentFromFile + "\n" + responsesFromFile; [CODE HAULT]
+
     const messages = [
       {
         role: "system",
-        content: contentFromFile,
+        content: contentFromFile
+        //content: systemMessageContent // Add the contents of the combined_output.txt file to the conversation [CODE HAULT]
       },
     ].concat(conversation.map((message) => ({
       role: message.role,
@@ -29,7 +33,7 @@ class ChatGPTService {
     const data = {
       model: "gpt-4",
       messages: messages,
-      max_tokens: 150,
+      max_tokens: 512,
       temperature: 0.7,
     };
   
@@ -62,8 +66,16 @@ class ChatGPTService {
 
     const conversation = await this.conversationService.getConversation(userId) || [];
     const response = await this.getResponse(conversation, userId);
-
-    await this.conversationService.updateConversation(userId, {
+    
+    fs.appendFile('responses.txt', `${response}\n`, (err) => {
+      if (err) {
+        console.error('Error writing response to file:', err);
+      } else {
+        console.log('Response written to file');
+      }
+    }
+    );
+      await this.conversationService.updateConversation(userId, {
         role: 'assistant',
         content: response,
     });
