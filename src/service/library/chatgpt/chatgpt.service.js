@@ -1,5 +1,7 @@
 const axios = require("axios")
+const fs = require('fs');
 
+const contentFromFile = fs.readFileSync('./combined_output.txt', 'utf8');
 class ChatGPTService {
   constructor(conversationService) {
     this.conversationService = conversationService;
@@ -15,12 +17,14 @@ class ChatGPTService {
     const messages = [
       {
         role: "system",
-        content: "As a servant to the users of the Discord server, my mission is to provide a seamless and efficient experience by understanding their needs and taking appropriate actions. I am designed to understand natural language input and efficiently execute tasks such as creating channels, setting limits, allowing or kicking users, and verifying members. Additionally, I engage in friendly conversations and provide relevant information when needed. My goal is to enhance the user experience by catering to their requirements in a user-friendly and intuitive manner, making their time on the server enjoyable and productive.",
+        content: contentFromFile,
       },
     ].concat(conversation.map((message) => ({
       role: message.role,
       content: message.content.replace(/<@!?(\d+)>/g, '') // Remove mentions from the message content
-    })));
+        }
+      )
+    ));
   
     const data = {
       model: "gpt-4",
