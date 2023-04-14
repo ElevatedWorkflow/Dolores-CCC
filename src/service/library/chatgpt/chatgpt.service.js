@@ -1,5 +1,8 @@
 const axios = require("axios")
+const fs = require('fs');
 
+const contentFromFile = fs.readFileSync('./combined_output.txt', 'utf8');
+//const responsesFromFile = fs.readFileSync("./responses.txt", "utf8"); [CODE HAULT]
 class ChatGPTService {
   constructor(conversationService) {
     this.conversationService = conversationService;
@@ -12,20 +15,25 @@ class ChatGPTService {
       Authorization: `Bearer ${this.apiKey}`,
     };
 
+    //const systemMessageContent = contentFromFile + "\n" + responsesFromFile; [CODE HAULT]
+
     const messages = [
       {
         role: "system",
-        content: "As a servant to the users of the Discord server, my mission is to provide a seamless and efficient experience by understanding their needs and taking appropriate actions. I am designed to understand natural language input and efficiently execute tasks such as creating channels, setting limits, allowing or kicking users, and verifying members. Additionally, I engage in friendly conversations and provide relevant information when needed. My goal is to enhance the user experience by catering to their requirements in a user-friendly and intuitive manner, making their time on the server enjoyable and productive.",
+        content: contentFromFile
+        //content: systemMessageContent // Add the contents of the combined_output.txt file to the conversation [CODE HAULT]
       },
     ].concat(conversation.map((message) => ({
       role: message.role,
       content: message.content.replace(/<@!?(\d+)>/g, '') // Remove mentions from the message content
-    })));
+        }
+      )
+    ));
   
     const data = {
       model: "gpt-4",
       messages: messages,
-      max_tokens: 150,
+      max_tokens: 512,
       temperature: 0.7,
     };
   
@@ -58,8 +66,16 @@ class ChatGPTService {
 
     const conversation = await this.conversationService.getConversation(userId) || [];
     const response = await this.getResponse(conversation, userId);
-
-    await this.conversationService.updateConversation(userId, {
+    
+    fs.appendFile('responses.txt', `${response}\n`, (err) => {
+      if (err) {
+        console.error('Error writing response to file:', err);
+      } else {
+        console.log('Response written to file');
+      }
+    }
+    );
+      await this.conversationService.updateConversation(userId, {
         role: 'assistant',
         content: response,
     });

@@ -125,5 +125,10 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
-src/config/client.config.json
-env
+
+#removes the code output that the bot reads from. It will generate a new one when ran with 'autoprod'
+combined_output.txt
+responses.txt
+combined_output.txt
+directory_tree.txt
+directoryFileDescriptions.txt
