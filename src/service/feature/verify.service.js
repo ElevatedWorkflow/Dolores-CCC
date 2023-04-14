@@ -1,68 +1,32 @@
-class VCManagerService {
-  constructor() {}
-
-  createPermissionOverwrites(guild, user) {
-    const everyoneRole = guild.roles.everyone;
-
-    return [
-      {
-        id: everyoneRole.id,
-        deny: ['VIEW_CHANNEL'],
-      },
-      {
-        id: user.id,
-        allow: ['VIEW_CHANNEL', 'CONNECT'],
-      },
-    ];
+class VerifyService {
+  constructor() {
+    // Constructor logic here (if needed)
   }
 
-  async create(interaction, channelName, parentChannelId, userLimit, user) {
-    const guild = interaction.guild;
-    const permissionOverwrites = this.createPermissionOverwrites(guild, user);
+  async verify(interaction, config) {
+    // Check if the sender has the required roles
+    const hasVerifyRole = interaction.member.roles.cache.has(process.env.VERIFY_ROLE_ID);
+    //const hasAdministratorRole = interaction.member.roles.cache.has(process.env.ADMINISTRATOR_ROLE_ID);
 
-    try {
-      const channel = await guild.channels.create(channelName, {
-        type: 'GUILD_VOICE',
-        parent: parentChannelId,
-        userLimit: userLimit,
-        permissionOverwrites: permissionOverwrites,
-      });
-
-      const embed = EmbedService.createBasicEmbedFromData('Channel Created', `Created voice channel: ${channel.name}`, [], false);
-      await interaction.reply({ embeds: [embed] });
-    } catch (error) {
-      console.error(`Error creating channel: ${error}`);
-      await interaction.reply('Error creating channel.');
+    if (!hasVerifyRole) {
+      return interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
     }
-  }
 
-  async limit(interaction) {
-    const channel = interaction.channel;
-    const limit = interaction.options.getInteger('number');
-    if (limit < 0) {
-      await interaction.reply('The limit must be a positive number');
-      return;
+    // Extract the user mentioned in the command
+    const userToVerify = interaction.options.getUser('user');
+
+    if (!userToVerify) {
+      return interaction.reply({ content: 'Please mention a user to verify.', ephemeral: true });
     }
-    await channel.edit({ userLimit: limit });
-    await interaction.reply(`The limit for ${channel} is now ${limit}`);
-  }
 
-  async allow(interaction) {
-    const user = interaction.options.getUser('user');
-    const channel = interaction.channel;
-    await channel.permissionOverwrites.create(user, {
-      VIEW_CHANNEL: true,
-      CONNECT: true,
-    });
-    await interaction.reply(`User ${user} can now join ${channel}`);
-  }
+    const memberToVerify = await interaction.guild.members.fetch(userToVerify);
 
-  async kick(interaction) {
-    const user = interaction.options.getUser('user');
-    const channel = interaction.channel;
-    await channel.permissionOverwrites.delete(user);
-    await interaction.reply(`User ${user} was kicked from ${channel}`);
+    // Remove the "Unverified" role and add the "Verified" role
+    await memberToVerify.roles.remove(config.unverifiedRoleID);
+    await memberToVerify.roles.add(config.verifiedRoleID);
+
+    interaction.reply({ content: `${memberToVerify.user.username} has been verified!`, ephemeral: true });
   }
 }
 
-module.exports = VCManagerService;
+module.exports = VerifyService;
