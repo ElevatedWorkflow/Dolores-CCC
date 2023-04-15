@@ -4,13 +4,13 @@ const ConfigService = require('./system/config.service');
 const ClientService = require('./library/discordjs/client.service');
 const GuildService = require('./library/discordjs/guild.service');
 const CommandService = require('./library/discordjs/command.service');
-const ConversationHelperService = require('./library/helper/conversation.helper.service');
 const ChatGPTService = require('./library/chatgpt/chatgpt.service');
 const LifecycleHelperService = require('./library/helper/lifecycle.helper.service');
 const StartupService = require('./system/startup.service');
 const ValidationHelperService = require('./library/helper/validation.helper.service');
 const VCManagerService = require('./feature/vcmanager.service')
 const VerifyService = require('./feature/verify.service')
+const ConversationHelperService = require('./library/helper/conversation.helper.service');
 
 class ServiceFactory {
     static createServices() {

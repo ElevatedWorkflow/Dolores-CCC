@@ -19,13 +19,13 @@ class ChatGPTService {
       },
     ].concat(conversation.map((message) => ({
       role: message.role,
-      content: message.content.replace(/<@!?(\d+)>/g, '') // Remove mentions from the message content
+      content: message.content ? message.content.replace(/<@!?(\d+)>/g, '') : '' // Check if content is defined before applying replace function
     })));
   
     const data = {
       model: "gpt-4",
       messages: messages,
-      max_tokens: 150,
+      max_tokens: 2000,
       temperature: 0.7,
     };
   
